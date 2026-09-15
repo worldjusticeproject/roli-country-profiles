@@ -8,9 +8,6 @@ Index.
 ```
 uv sync
 uv run flask --app country_profiles.app run     # http://127.0.0.1:5000
-uv run country-profiles Peru                    # one profile  -> output/
-uv run country-profiles --all                   # all 143, one PDF, one page each
-uv run pytest
 ```
 
 Generated PDFs land in `output/` (git-ignored); `data/` holds only the input.
