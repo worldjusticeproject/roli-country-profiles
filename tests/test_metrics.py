@@ -105,6 +105,20 @@ def test_baseline_falls_back(country, baseline):
     assert build_profile(country)["baseline_label"] == baseline
 
 
+@pytest.mark.parametrize(
+    "country, spark_start",
+    [
+        ("Peru", "2020"),
+        ("Denmark", "2020"),
+        ("Ireland", "2021"),
+        ("Kuwait", "2023"),
+        ("Qatar", "2025"),
+    ],
+)
+def test_spark_start(country, spark_start):
+    assert build_profile(country)["spark_start"] == spark_start
+
+
 def test_above_average_country():
     assert build_profile("Denmark")["overall"]["comparison"] == "Above"
 

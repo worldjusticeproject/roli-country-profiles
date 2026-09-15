@@ -345,6 +345,7 @@ def build_profile(country: str) -> dict:
         "income": income.capitalize() if income else None,
         "edition": latest,
         "window": data.window,
+        "spark_start": available[0],
         "baseline": baseline,
         "baseline_label": f"{baseline} vs. {latest}" if baseline else "",
         "overall": {

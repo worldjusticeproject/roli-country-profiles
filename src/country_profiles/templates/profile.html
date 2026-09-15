@@ -109,7 +109,7 @@
               <th class="c-name">Factor</th>
               <th class="c-score">Factor<br>Score</th>
               <th class="c-change">Score Change<br><span class="sub">({{ p.baseline_label }})</span></th>
-              <th class="c-spark">{{ p.window[0] }}-{{ p.edition }}</th>
+              <th class="c-spark">{{ p.spark_start }}{% if p.spark_start != p.edition %}-{{ p.edition }}{% endif %}</th>
               <th class="c-rank">Global<br>Rank</th>
               <th class="c-rank">Regional<br>Rank</th>
             </tr>
@@ -168,9 +168,9 @@
       <div class="panel chart">
         <h2>Score Over Time</h2>
         <div class="chart-legend" style="font-size: {{ legend_size }}pt">
-          <span class="key"><svg width="12pt" height="6pt" viewBox="0 0 12 6"><line x1="0" y1="3" x2="12" y2="3" stroke="#181878" stroke-width="2"/></svg>{{ p.name }}</span>
-          <span class="key"><svg width="12pt" height="6pt" viewBox="0 0 12 6"><line x1="0" y1="3" x2="12" y2="3" stroke="#5d5c5c" stroke-width="2"/></svg>Global Average</span>
-          <span class="key"><svg width="12pt" height="6pt" viewBox="0 0 12 6"><line x1="0" y1="3" x2="12" y2="3" stroke="#8c8c8d" stroke-width="1.4" stroke-dasharray="2 3" stroke-linecap="round"/></svg>Regional Average</span>
+          <span class="key"><svg width="12pt" height="6pt" viewBox="0 0 12 6"><line x1="0" y1="3" x2="12" y2="3" stroke="#181878" stroke-width="2"/><circle cx="0" cy="3" r="1.7" fill="#181878"/><circle cx="12" cy="3" r="1.7" fill="#181878"/></svg>{{ p.name }}</span>
+          <span class="key"><svg width="12pt" height="6pt" viewBox="0 0 12 6"><line x1="0" y1="3" x2="12" y2="3" stroke="#9d9d9c" stroke-width="2"/><circle cx="0" cy="3" r="1.7" fill="#9d9d9c"/><circle cx="12" cy="3" r="1.7" fill="#9d9d9c"/></svg>Global Average</span>
+          <span class="key"><svg width="12pt" height="6pt" viewBox="0 0 12 6"><line x1="0" y1="3" x2="12" y2="3" stroke="#8c8c8d" stroke-width="1.4" stroke-dasharray="2 3" stroke-linecap="round"/><circle cx="0" cy="3" r="1.7" fill="#8c8c8d"/><circle cx="12" cy="3" r="1.7" fill="#8c8c8d"/></svg>Regional Average</span>
         </div>
         <svg class="timechart" width="{{ chart.width }}pt" height="{{ chart.height }}pt"
              viewBox="0 0 {{ chart.width }} {{ chart.height }}">
@@ -180,7 +180,7 @@
           {% if loop.first %}
           <line x1="{{ chart.plot_left }}" y1="{{ '%.2f'|format(t.y) }}" x2="{{ chart.plot_right }}" y2="{{ '%.2f'|format(t.y) }}" stroke="#c6c6c6" stroke-width="0.75"/>
           {% else %}
-          <line x1="{{ chart.plot_left }}" y1="{{ '%.2f'|format(t.y) }}" x2="{{ chart.plot_right }}" y2="{{ '%.2f'|format(t.y) }}" stroke="#bdbdbc" stroke-width="0.5" stroke-dasharray="1 2"/>
+          <line x1="{{ chart.plot_left }}" y1="{{ '%.2f'|format(t.y) }}" x2="{{ chart.plot_right }}" y2="{{ '%.2f'|format(t.y) }}" stroke="#e8e8e8" stroke-width="0.5"/>
           {% endif %}
           {% endfor %}
 
@@ -190,13 +190,18 @@
 
           <polyline points="{{ path(chart.regional) }}" fill="none" stroke="#8c8c8d" stroke-width="1.3" stroke-dasharray="2 3" stroke-linecap="round" stroke-linejoin="round"/>
           <polyline points="{{ path(chart['global']) }}" fill="none" stroke="#9d9d9c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          {% for x, y in chart['global'] %}
+          {% if loop.first or loop.last %}
+          <circle cx="{{ '%.2f'|format(x) }}" cy="{{ '%.2f'|format(y) }}" r="2" fill="#9d9d9c"/>
+          {% endif %}
+          {% endfor %}
           <polyline points="{{ path(chart.country) }}" fill="none" stroke="#181878" stroke-width="2" stroke-linejoin="round"/>
           {% for x, y in chart.country %}
           <circle cx="{{ '%.2f'|format(x) }}" cy="{{ '%.2f'|format(y) }}" r="2.85" fill="#181878"/>
           {% endfor %}
           {% for lbl in chart.country_labels %}
           <text x="{{ '%.2f'|format(lbl.x) }}" y="{{ '%.2f'|format(lbl.y) }}" text-anchor="middle"
-                font-family="Inter Tight" font-size="7" font-weight="600" fill="#bf03af">{{ lbl.text }}</text>
+                font-family="Inter Tight" font-size="7" font-weight="600" fill="#181878">{{ lbl.text }}</text>
           {% endfor %}
           {% for yr in chart.years %}
           <text x="{{ '%.2f'|format(yr.x) }}" y="{{ '%.2f'|format(chart.axis_y + 8) }}" text-anchor="middle"

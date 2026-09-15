@@ -27,17 +27,23 @@ CHART_LABEL_DROP = 13.0  # value label baseline, below its point
 
 
 def sparkline(values: list[float | None]) -> list[tuple[float, float]]:
-    """Points for one factor's six-year sparkline, centred on its own mean."""
+    """Points for one factor's sparkline, stretched across its known years.
+
+    A country that joined the Index partway through the window has ``None``
+    for its earlier years; those are skipped entirely rather than left as
+    empty space, so the known points always span the full cell.
+    """
     known = [v for v in values if v is not None]
     if not known:
         return []
     center = (max(known) + min(known)) / 2
     mid = SPARK_HEIGHT / 2
-    step = SPARK_WIDTH / (len(values) - 1)
+    if len(known) == 1:
+        return [(SPARK_WIDTH, mid - (known[0] - center) * SPARK_SCALE)]
+    step = SPARK_WIDTH / (len(known) - 1)
     return [
         (i * step, mid - (v - center) * SPARK_SCALE)
-        for i, v in enumerate(values)
-        if v is not None
+        for i, v in enumerate(known)
     ]
 
 

@@ -66,6 +66,7 @@ Scores" tab, which is the only place the Index publishes it.
 | Regional / income rank | same, within the country's region or income group |
 | Global / regional average | mean over that group in the latest year |
 | Change window | six index years (2020–2025), falling back to the country's earliest year in that window |
+| Sparkline column header | the country's earliest year in the window through the latest edition (e.g. "2023-2025" for a country that joined in 2023), or just the single year if it has only one year of data |
 
 The three-decimal rounding is not cosmetic: it is what reproduces the reference
 profile exactly. Computing the percent change from raw values gives Peru
