@@ -1,13 +1,23 @@
 [project]
-name = "roli-country-profiles"
-version = "1.0.0"
-description = "Data parser and static dashboard for WJP Rule of Law Index country profiles"
+name = "country-profiles"
+version = "0.1.0"
+description = "WJP Rule of Law Index country profile PDF generator"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 dependencies = [
-  "openpyxl==3.1.5",
-  "pandas==3.0.3",
+    "flask>=3.0",
+    "weasyprint>=66",
+    "openpyxl>=3.1",
 ]
 
-[tool.uv]
-package = false
+[project.scripts]
+country-profiles = "country_profiles:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

@@ -1,0 +1,337 @@
+/* One-page WJP country profile. Every length is in points, taken from the
+   reference profile in data/processed/vertical.pdf. */
+
+@font-face {
+  font-family: "Inter Tight";
+  src: url("fonts/InterTight-Regular.ttf") format("truetype");
+  font-weight: 400;
+}
+@font-face {
+  font-family: "Inter Tight";
+  src: url("fonts/InterTight-Medium.ttf") format("truetype");
+  font-weight: 500;
+}
+@font-face {
+  font-family: "Inter Tight";
+  src: url("fonts/InterTight-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+}
+@font-face {
+  font-family: "Inter Tight";
+  src: url("fonts/InterTight-Bold.ttf") format("truetype");
+  font-weight: 700;
+}
+@font-face {
+  font-family: "Inter Tight";
+  src: url("fonts/InterTight-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
+}
+
+/* Palette from specs/country profile-specs.pdf -- Foundations > Colors. */
+:root {
+  --ink: #222221;        /* primary text */
+  --muted: #4e4e4b;      /* secondary text */
+  --panel: #f6f6f6;
+  --track: #c6c6c6;
+  --line: #c6c6c6;
+
+  --up: #0b6f32;         /* above global average / moved up */
+  --down: #bc1818;       /* below global average / moved down */
+  --flat: #4e4e4b;       /* at the average / no change / no data */
+  --up-bg: #cce5d7;
+  --down-bg: #fae6ea;
+  --flat-bg: #e2e2dc;
+  --badge-down-bg: #f7e7ea;  /* Overall Score badge component override */
+
+  --chart-country: #181878;
+  --chart-global: #9d9d9c;
+  --chart-regional: #8c8c8d;
+  --chart-value: #bf03af;
+  --chart-grid: #bdbdbc;
+}
+
+@page {
+  size: Letter;
+  margin: 36pt 42.5pt 28pt 42pt;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "Inter Tight", "Fira Sans", sans-serif;
+  font-size: 8pt;
+  line-height: 1.28;
+  color: var(--ink);
+  background: #fff;
+  -weasy-font-variant-numeric: lining-nums;
+}
+
+.page { width: 527.5pt; }
+
+/* ---------------------------------------------------------------- top band */
+
+.top { display: flex; gap: 5.5pt; }
+.col-left { width: 306pt; }
+.col-right { width: 216pt; margin-top: 17.3pt; }
+.col-right .panel + .panel { margin-top: 4.8pt; }
+
+.masthead { height: 74.9pt; }
+.masthead h1 {
+  position: relative;
+  top: -3.3pt;
+  font-size: 24pt;
+  font-weight: 700;
+  letter-spacing: -0.4pt;
+  line-height: 1.1;
+}
+.masthead .meta { font-size: 10pt; margin-top: 3.5pt; }
+.masthead .meta b { font-weight: 600; }
+.masthead .note {
+  font-size: 8pt;
+  color: var(--muted);
+  margin-top: 2pt;
+  line-height: 1.38;
+}
+.note .rule { color: #B5B5B5; padding: 0 1pt; }
+.note .up { color: var(--up); }
+.note .down { color: var(--down); }
+.note .flat { color: var(--flat); }
+
+.panel {
+  background: var(--panel);
+  border-radius: 12pt;
+  padding: 10.5pt;
+}
+
+/* --------------------------------------------------------- factor overview */
+
+.factor-table { padding: 7pt 10.5pt 0; height: 196.8pt; }
+.factor-table table { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
+.factor-table th {
+  font-weight: 500;
+  font-size: 8pt;
+  color: var(--ink);
+  vertical-align: bottom;
+  text-align: center;
+  padding-bottom: 4pt;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+.factor-table thead tr { border-bottom: 0.5pt solid var(--line); }
+.factor-table th.c-name { text-align: left; }
+.factor-table th .sub { font-size: 6.5pt; font-weight: 400; color: var(--muted); }
+.factor-table td {
+  font-size: 8pt;
+  font-weight: 400;
+  vertical-align: middle;
+  text-align: center;
+  padding: 1.6pt 0;
+  border-top: 0.5pt solid var(--line);
+}
+.factor-table tbody tr:first-child td { border-top: none; }
+.factor-table td.c-name { text-align: left; line-height: 1.12; padding-right: 4pt; }
+
+.c-name  { width: 84pt; }
+.c-score { width: 24pt; }
+.c-change{ width: 51pt; }
+.c-spark { width: 48pt; }
+.c-rank  { width: 35pt; }
+
+.c-change.up   { color: var(--up); }
+.c-change.down { color: var(--down); }
+.c-change.flat { color: var(--flat); }
+.c-spark svg { display: block; margin: 0 auto; }
+
+/* ------------------------------------------------------------ overall score */
+
+.overall { height: 83.5pt; padding: 8pt 10.5pt; }
+.overall h2, .chart h2 { font-size: 10pt; font-weight: 500; color: var(--ink); }
+
+.score-row { display: flex; align-items: center; gap: 9.6pt; margin-top: 3.4pt; }
+.overall .big {
+  font-size: 20pt;
+  font-weight: 600;
+  letter-spacing: -0.3pt;
+  line-height: 1.15;
+}
+.badge {
+  font-size: 7pt;
+  font-weight: 400;
+  line-height: 1.15;
+  padding: 3pt 5pt;
+  border-radius: 2pt;
+  border: 0.75pt solid;
+  white-space: nowrap;
+}
+.badge.below { color: var(--down); border-color: var(--down); background: var(--badge-down-bg); }
+.badge.above { color: var(--up);   border-color: var(--up);   background: var(--up-bg); }
+.badge.level { color: var(--flat); border-color: var(--flat); background: var(--flat-bg); }
+
+.stats { display: flex; align-items: flex-end; gap: 7pt; margin-top: 3.5pt; }
+.stat-label { font-size: 7pt; font-weight: 600; color: var(--muted); }
+.stat-value { font-size: 7.4pt; }
+.stat.change { width: 46pt; }
+.stat.change .stat-value { font-size: 12pt; font-weight: 600; letter-spacing: -0.2pt; }
+.stat.change .stat-label { font-weight: 400; }
+.stat.change.up   { color: var(--up); }
+.stat.change.down { color: var(--down); }
+.stat.change.flat { color: var(--flat); }
+.stat.change .stat-label { color: var(--muted); }
+.stat.rank .stat-value { font-size: 8pt; }
+.stat.rank .stat-value b { font-size: 12pt; font-weight: 600; letter-spacing: -0.2pt; color: var(--ink); }
+.stat.rank .of { color: var(--muted); font-size: 8pt; font-weight: 400; }
+.arw { display: inline-block; width: 0.8em; height: 0.8em; vertical-align: -0.02em; }
+.arw svg { display: block; width: 100%; height: 100%; fill: currentColor; }
+
+/* ------------------------------------------------------------- time series */
+
+.chart { height: 167pt; padding: 10.4pt 10.5pt 0; }
+/* Long country names cannot fit beside both averages; let the legend wrap
+   and render.py shortens the chart by one row to keep the panel the same
+   height. The sizes here mirror the LEGEND_* constants in render.py. */
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.6pt 8pt;
+  margin: 7pt 0 4pt;
+  font-size: 8pt;
+  color: var(--ink);
+}
+.chart-legend .key { display: flex; align-items: center; gap: 2.4pt; white-space: nowrap; }
+.timechart { display: block; }
+.timechart .ax { font-size: 7pt; fill: var(--muted); }
+.timechart .pt { font-size: 7pt; font-weight: 600; fill: var(--chart-value); }
+
+/* --------------------------------------------------------- factor detail */
+
+.lower { margin-top: 10.6pt; }
+.lower-title { font-size: 10pt; font-weight: 500; line-height: 1.1; color: var(--ink); }
+.pill {
+  display: flex;
+  gap: 15pt;
+  width: 154.6pt;
+  height: 16.4pt;
+  margin: 4pt 0 0;
+  padding: 0 7pt;
+  white-space: nowrap;
+  border-radius: 3pt;
+  background: #d8d8d8;
+  font-size: 8pt;
+  align-items: center;
+}
+.pill .key { display: flex; align-items: center; gap: 3.2pt; }
+
+.dot {
+  display: inline-block;
+  flex: none;
+  width: 4pt;
+  height: 4pt;
+  border-radius: 999pt;
+}
+.dot.solid { background: #fff; }
+.dot.ring  { border: 0.75pt solid #fff; }
+
+.factor-columns { overflow: hidden; }
+.factor-col { float: left; width: 177.3pt; }
+.factor-col:last-child { width: 138.3pt; }
+.factor-col h3 {
+  font-size: 10pt;
+  font-weight: 500;
+  margin: 8.5pt 0 3.5pt;
+  letter-spacing: -0.1pt;
+}
+.factor-col > h3:first-child { margin-top: 0; }
+.factor-col .pill + h3 { margin-top: 10.6pt; }
+
+.sub-label { font-size: 6.5pt; line-height: 1.2; }
+.sub-row { display: flex; align-items: center; gap: 5.2pt; margin: 1.4pt 0 2.9pt; }
+.track {
+  position: relative;
+  width: 121pt;
+  height: 8pt;
+  border-radius: 3pt;
+  background: var(--track);
+}
+.fill { height: 8pt; border-radius: 3pt; }
+.track .dot { position: absolute; top: 2pt; margin-left: -2pt; }
+.value { font-size: 6.5pt; }
+
+/* ------------------------------------------------------------------ footer */
+
+footer {
+  position: fixed;
+  bottom: -1pt;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  font-size: 7pt;
+  color: var(--muted);
+}
+footer .left { font-size: 7pt; font-weight: 500; letter-spacing: 0.15pt; text-transform: uppercase; }
+footer b { font-weight: 500; color: var(--muted); }
+
+/* ------------------------------------------------------------------ screen
+
+   Everything below is for the browser only. WeasyPrint renders the `print`
+   media type, so none of it reaches the PDF -- and the toolbar markup is not
+   emitted for a PDF in the first place. */
+
+@media screen {
+  body {
+    background: #ECEBEA;
+    padding: 62pt 0 24pt;
+  }
+  .page {
+    margin: 0 auto;
+    padding: 36pt 42.5pt 28pt 42pt;
+    width: 612pt;
+    min-height: 792pt;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .16), 0 8px 24px rgba(0, 0, 0, .10);
+  }
+  /* the footer is page-anchored in print; in the browser it just ends the page */
+  footer { position: static; margin-top: 22pt; }
+
+  .toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 10pt;
+    padding: 8pt 14pt;
+    background: #fff;
+    border-bottom: 0.75pt solid #D8D6D4;
+    font-size: 10pt;
+  }
+  .toolbar label { color: var(--muted); }
+  .toolbar select {
+    flex: 0 1 260pt;
+    min-width: 0;
+    padding: 4pt 6pt;
+    font: inherit;
+    color: var(--ink);
+    background: #fff;
+    border: 0.75pt solid #C6C6C6;
+    border-radius: 4pt;
+  }
+  .toolbar .btn {
+    margin-left: auto;
+    padding: 5pt 10pt;
+    border-radius: 4pt;
+    background: #1B6C6C;
+    color: #fff;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .toolbar .btn.ghost {
+    margin-left: 0;
+    background: #fff;
+    color: #1B6C6C;
+    border: 0.75pt solid #1B6C6C;
+  }
+  .toolbar .btn.busy { opacity: .55; pointer-events: none; }
+}

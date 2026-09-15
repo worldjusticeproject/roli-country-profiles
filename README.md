@@ -1,436 +1,135 @@
-# Rule of Law Index — Country Profiles
+# WJP country profiles
 
-Static dashboard and export pipeline for **World Justice Project Rule of Law Index**
-country profiles.
+Renders the one-page WJP Rule of Law Index country profile — matching the design
+in `specs/` — from a single historical-data workbook
+(`data/wjp_rol_index_historical.xlsx`), for any of the 143 countries in the
+Index.
 
-This repository has two responsibilities:
-
-1. Parse the WJP Excel workbook into a stable JSON artifact
-2. Render and export country profiles from that JSON in the browser
-
-The app is optimized for annual data refreshes, predictable static deployment,
-and consistent SVG/PDF output rather than for multi-user analytics or a backend workflow.
-
-## Current Dataset
-
-- Year: `2025`
-- Previous year used for comparison: `2024`
-- Countries: `143`
-- Runtime payload: `public/data/roli.json`
-- Versioned source-of-truth artifact: `data/roli.json`
-
-The runtime payload currently includes:
-
-- top-level metadata
-- country records
-- precomputed global averages
-- precomputed regional averages
-- year-over-year derived stats
-
-## What the Application Does
-
-- Browse one country profile at a time
-- Filter countries by region
-- View a precomputed global or regional average profile
-- Display ranking and year-over-year change metrics for real countries
-- Export the currently visible profile as SVG
-- Export a multi-page PDF containing every country in alphabetical order
-
-## Product Rules That Matter
-
-- The visible year comes from the JSON payload, not from hardcoded UI text.
-- When the region changes, the selected profile resets to the regional average.
-- Global/regional average views come from `averages` in the JSON, not from frontend recomputation.
-- The PDF export always includes every country, regardless of the active region filter.
-- The PDF export intentionally excludes synthetic average profiles.
-- The React chart and the SVG export are separate renderers and must stay in sync manually.
-
-## Technology Stack
-
-### Frontend
-
-- `React 18`
-- `Vite 5`
-- `PropTypes`
-
-### Export
-
-- `jsPDF`
-- `svg2pdf.js`
-- self-hosted `Inter Tight` font files
-
-### Data Pipeline
-
-- `Python 3.14`
-- `uv`
-- `pandas`
-- `openpyxl`
-
-## Repository Structure
-
-```text
-roli-country-profiles/
-├── .claude/
-│   ├── CONTEXT.md
-│   └── settings.json
-├── data/
-│   └── roli.json
-├── public/
-│   ├── data/
-│   │   └── roli.json
-│   └── fonts/
-│       ├── InterTight-Bold.ttf
-│       ├── InterTight-Regular.ttf
-│       └── InterTight-SemiBold.ttf
-├── scripts/
-│   └── parse-roli-data.py
-├── src/
-│   ├── components/
-│   ├── config/
-│   ├── hooks/
-│   ├── utils/
-│   ├── App.jsx
-│   ├── index.css
-│   └── main.jsx
-├── .gitignore
-├── .npmrc
-├── .nvmrc
-├── .python-version
-├── package.json
-├── pyproject.toml
-├── SECURITY.md
-├── uv.lock
-├── vercel.json
-└── vite.config.js
+```
+uv sync
+uv run flask --app country_profiles.app run     # http://127.0.0.1:5000
+uv run country-profiles Peru                    # one profile  -> output/
+uv run country-profiles --all                   # all 143, one PDF, one page each
+uv run pytest
 ```
 
-## Architecture Overview
+Generated PDFs land in `output/` (git-ignored); `data/` holds only the input.
 
-### End-to-end flow
+Opening the app shows a profile straight away (Peru by default). Picking a
+country from the toolbar switches to it; **Download this profile** gives that
+one page, **Download all 143** gives a single PDF with one country per page.
 
-```text
-WJP Excel workbook
-  -> scripts/parse-roli-data.py
-  -> data/roli.json
-  -> public/data/roli.json
-  -> useRoliData()
-  -> App.jsx
-  -> resolveSelection()
-  -> CountryProfileChart.jsx
-  -> exportSvg.js / exportPdf.js
-```
-
-### Separation of concerns
-
-- `src/config/`
-  Semantic source of truth for factors, regions, labels, and colors
-
-- `src/hooks/useRoliData.js`
-  Runtime fetch/load boundary for the JSON payload
-
-- `src/utils/filters.js`
-  Pure selection helpers
-
-- `src/components/CountryProfileChart.jsx`
-  On-screen renderer
-
-- `src/utils/svgBuilder.js`
-  Export renderer
-
-- `scripts/parse-roli-data.py`
-  Data-ingestion and derivation layer
-
-## Data Contract
-
-The frontend assumes the parser outputs this top-level shape:
-
-```json
-{
-  "year": 2025,
-  "previousYear": 2024,
-  "sourceSheet": "WJP ROL Index 2025 Scores",
-  "sourceFile": "2025_wjp_rule_of_law_index_HISTORICAL_DATA_FILE.xlsx",
-  "averages": {
-    "global": {},
-    "regional": {}
-  },
-  "countries": []
-}
-```
-
-### `averages`
-
-The `averages` object must contain:
-
-- `global`
-- `regional`
-
-`regional` is keyed by the exact region labels present in the source data.
-
-These average profiles contain:
-
-- `overall`
-- `f1..f8`
-- `sf11..sf87`
-
-They do not carry ranking/change fields.
-
-### Country records
-
-Each country record includes:
-
-- identifiers:
-  - `country`
-  - `code`
-  - `region`
-  - `income`
-- score metrics:
-  - `overall`
-  - `f1..f8`
-  - `sf11..sf87`
-- derived rank fields:
-  - `globalRank`, `globalTotal`
-  - `regionalRank`, `regionalTotal`
-  - `incomeRank`, `incomeTotal`
-- derived comparison fields:
-  - `globalRankChange`
-  - `scoreChange`
-  - `pctChange`
-
-If the data contract changes, review at minimum:
-
-- `src/hooks/useRoliData.js`
-- `src/utils/filters.js`
-- `src/components/StatsCard.jsx`
-- `src/components/CountryProfileChart.jsx`
-- `src/utils/svgBuilder.js`
-
-## Setup
-
-### Prerequisites
-
-- `nvm` or equivalent Node version manager
-- `Node.js 24.12.0`
-- `npm 11.6.2`
-- `uv`
-
-### Install dependencies
-
-```bash
-nvm use
-npm ci
-UV_CACHE_DIR=.uv-cache uv sync
-```
-
-### Why both package managers exist
-
-- `npm` manages the frontend and build toolchain
-- `uv` manages the Python parser environment
-
-Do not mix Python environment management back into ad hoc `pip install` workflow unless you are intentionally debugging outside the locked setup.
-
-## Available Commands
-
-| Command | Purpose |
+| Route | |
 | --- | --- |
-| `npm run dev` | Start the Vite development server |
-| `npm run build` | Build the production app into `dist/` |
-| `npm run preview` | Preview the production build locally |
-| `npm run lint` | Lint the frontend source tree |
-| `npm run parse-data` | Regenerate both JSON outputs from the WJP workbook |
-| `npm run audit` | Run `npm audit` at high severity threshold |
-| `npm run audit:fix` | Apply automatic npm audit fixes when possible |
+| `/` | the default profile, with the picker |
+| `/profile/<country>` | that country's profile, with the picker |
+| `/profile/<country>.pdf` | one profile as a one-page PDF |
+| `POST /profiles/build` | start the combined build in the background |
+| `/profiles/status` | JSON progress: `{state, done, total, bytes}` |
+| `/profiles.pdf` | the combined PDF, served off disk |
 
-## Local Development
+The browser view and the PDF render the same Jinja template, so the layout can
+be iterated on in a browser and comes out identical in print. The toolbar and
+the paper-sheet framing live in an `@media screen` block and are never emitted
+for a PDF.
 
-### Start the dev server
+### Building all 143
 
-```bash
-npm run dev
-```
+The combined PDF takes about 80 seconds, which is far too long to hold an HTTP
+request open -- the browser sees no bytes and gives up. So the button starts a
+worker thread instead (`jobs.py`), which writes
 
-By default the app loads:
+    output/WJP_country_profiles_2025.pdf
 
-- `public/data/roli.json`
-- self-hosted fonts from `public/fonts/`
+The page polls `/profiles/status` and shows `Building 57/143...`, then turns into
+a link to the finished file. The rest of the app stays responsive while it runs,
+nothing times out, and the result persists across restarts -- reopen the app and
+the button is already a download. It writes to a `.part` file and renames on
+success, so a half-built file is never served.
 
-### Build for production
+`country-profiles --all` does the same thing from the command line.
 
-```bash
-npm run build
-```
+## How the numbers are derived
 
-### Preview production output
+Everything comes from the single **Historical Data** sheet in
+`data/wjp_rol_index_historical.xlsx`: the full score history, each country's
+region (`Region` column), and its income group (`income_group` column). The
+`f_*` score columns and `income_group` are located by header name, so their
+position in the sheet doesn't matter.
 
-```bash
-npm run preview
-```
+That file is the WJP Index's published historical-data sheet with one column
+added — `income_group`, copied in from the per-edition "WJP ROL Index &lt;year&gt;
+Scores" tab, which is the only place the Index publishes it.
 
-### Lint
+| Quantity | Rule |
+| --- | --- |
+| Displayed score | `round(x, 2)` |
+| Percent change | scores rounded to **three** decimals first, then `(b - a) / a` |
+| Global rank | descending rank among all 143 countries in the latest year |
+| Regional / income rank | same, within the country's region or income group |
+| Global / regional average | mean over that group in the latest year |
+| Change window | six index years (2020–2025), falling back to the country's earliest year in that window |
 
-```bash
-npm run lint
-```
+The three-decimal rounding is not cosmetic: it is what reproduces the reference
+profile exactly. Computing the percent change from raw values gives Peru
+-4.51% where the reference prints -4.4%. `tests/test_metrics.py` pins every
+figure read off that PDF.
 
-## Data Refresh Workflow
+## Relationship to the reference PDF
 
-The parser at [`scripts/parse-roli-data.py`](./scripts/parse-roli-data.py) is designed to survive normal annual WJP releases without hardcoded row indices.
+The design is specified by `specs/country profile-specs.pdf` (grid, colour
+tokens, type scale, per-component geometry) with `specs/Country Profile-3.pdf`
+as the reference render. Both are drawn for a **2026** mockup whose figures come
+from the **2025** data with the year labels shifted forward one year; the
+generated profiles use the real labels — 2020–2025, "WJP RULE OF LAW INDEX
+2025".
 
-### What the parser does
+The factor palette and semantic colours are taken from the written spec sheet
+(`Foundations > Colors`), not from the SVG export, which had a few stale hues.
+`data.py` carries two colours per factor: `color` for bars and sparklines, and
+`text_color` for the factor name — they differ only for the three light hues the
+spec flags as low-contrast (factors 2, 3, 8).
 
-- auto-discovers the workbook in `data/`
-- finds the latest `WJP ROL Index <YYYY> Scores` sheet
-- finds the most recent strictly older score sheet for comparison when available
-- detects rows by labels instead of fixed row numbers
-- parses metadata, factors, and subfactors
-- computes per-country rank/change fields
-- computes prebuilt global and regional average profiles
-- writes:
-  - `data/roli.json`
-  - `public/data/roli.json`
+Three cells in the mockup are Illustrator artifacts and are deliberately not
+reproduced: factor 4's regional rank (shows 21, correct is 16) and displayed
+score (shows 0.57, correct is 0.58), and the hand-jittered Score Over Time line.
 
-### Standard update procedure
+## Layout
 
-1. Place the latest WJP Excel workbook under `data/`
-2. Run:
+`src/country_profiles/`
 
-```bash
-npm run parse-data
-```
+| File | Role |
+| --- | --- |
+| `data.py` | parses the workbook once, precomputes ranks and means, builds a profile dict |
+| `charts.py` | geometry for the sparklines and the Score Over Time chart |
+| `metrics.py` | text measurement, so long names can be fitted before layout |
+| `render.py` | Jinja → HTML → PDF (WeasyPrint) |
+| `jobs.py` | background build of the combined PDF, with progress |
+| `paths.py` | where generated files go |
+| `app.py` | Flask routes |
+| `templates/profile.html` | the profile; inline SVG for both charts |
+| `static/profile.css` | every length in points, measured off the reference PDF |
+| `static/fonts/` | Inter Tight (OFL) — Regular/Medium/SemiBold/Bold/ExtraBold static instances cut from the variable font |
 
-3. Inspect the generated JSON artifacts
-4. Run:
+### Long country names
 
-```bash
-npm run lint
-npm run build
-```
+A print page cannot reflow, so anything that might not fit is measured against
+the real font (`metrics.py`) and fitted before layout rather than allowed to
+overflow:
 
-5. Manually validate:
-   - year label
-   - region filter behavior
-   - global/regional average views
-   - SVG export
-   - PDF export
+* **The title** is set at 24pt Bold and shrinks only as far as it must to stay
+  on one line in the 306pt column. Exactly one country needs this --
+  *St. Vincent and the Grenadines*, at ~21pt. Left to wrap it would spill out
+  of the fixed-height masthead and collide with the factor table.
+* **The chart legend** has to hold the country name beside both averages in a
+  195pt panel. Most fit on one row at the spec's 8pt (about 57 shrink a little
+  further); the 7 longest wrap onto two rows, and the chart below them loses one
+  row of height so the panel stays the same size.
 
-## Export System
+`tests/test_layout.py` runs both checks over every country, and walks the
+laid-out boxes to assert nothing crosses the page edge.
 
-### SVG export
-
-- Implemented in `src/utils/exportSvg.js`
-- Uses `src/utils/svgBuilder.js`
-- Exports only the currently visible profile
-- Sanitizes filenames before triggering download
-- Uses `Blob` + `URL.createObjectURL`
-
-### PDF export
-
-- Implemented in `src/utils/exportPdf.js`
-- Builds one page per country
-- Always uses the full alphabetical country list
-- Loads PDF dependencies lazily
-- Registers local `Inter Tight` TTF files in jsPDF
-- Mounts each generated SVG in an off-screen sandbox because `svg2pdf.js` needs DOM presence for style resolution
-
-## Styling and UI Conventions
-
-- Most component styling is inline
-- Shared tokens live in `src/config/colors.js`
-- Global document styles live in `src/index.css`
-- Typography is intentionally restricted to a single self-hosted family
-- The UI uses an editorial layout rather than a general-purpose admin dashboard pattern
-
-## Deployment
-
-The repository is configured for static hosting on Vercel.
-
-### Current deployment behavior
-
-- build command: `npm run build`
-- output directory: `dist`
-- SPA rewrite: all paths rewrite to `index.html`
-
-### Cache behavior
-
-- `/assets/*`
-  long-lived immutable cache
-
-- `/data/*`
-  shorter cache with `stale-while-revalidate`
-
-That split is intentional: code/assets change rarely, data may refresh more often.
-
-## Security Summary
-
-The app is designed to be a low-complexity static frontend.
-
-Current security properties:
-
-- no backend
-- no authentication
-- no secret management at runtime
-- no cookies
-- no local storage
-- no third-party runtime API calls
-- CSP and security headers are defined in `vercel.json`
-
-Current security status:
-
-- `npm audit` is currently clean at the configured high-severity threshold
-- the repo has already been remediated to `jspdf 4.2.1` and `vite 8.0.13`
-
-Full details live in [SECURITY.md](./SECURITY.md).
-
-## Maintenance Notes
-
-### High-risk change areas
-
-- `src/config/structure.js`
-  Changes the semantic shape of the chart
-
-- `src/utils/svgBuilder.js`
-  Can desynchronize exports from on-screen rendering
-
-- `scripts/parse-roli-data.py`
-  Controls the contract the entire UI depends on
-
-- `vercel.json`
-  Controls CSP, headers, and cache policies
-
-### There is no test suite
-
-This repo currently depends on:
-
-- parser execution
-- lint
-- production build
-- manual verification of UI/export behavior
-
-For anything touching data shape, rendering, or export, assume manual regression testing is required.
-
-## Repository Hygiene
-
-Ignored locally:
-
-- `node_modules/`
-- `dist/`
-- `.venv/`
-- `.uv-cache/`
-- local `.env*`
-- raw `.xlsx` inputs
-- `.claude/settings.local.json`
-
-Versioned intentionally:
-
-- parsed JSON outputs
-- Vercel config
-- Python lockfile
-- npm lockfile
-- self-hosted fonts
-
-## License and Data Use
-
-This repository is intended for editorial, institutional, or research workflows.
-The underlying Rule of Law Index dataset remains the property of the
-**World Justice Project**. Confirm any licensing, redistribution, or attribution
-requirements that apply to the source data before republishing derivative outputs.
+Factor colours, panel geometry and type sizes come from
+`specs/country profile-specs.pdf`; the sparklines share one vertical scale
+(~50pt per score unit) and are centred per factor, which is why a factor that
+barely moved reads flat next to one that fell sharply.
