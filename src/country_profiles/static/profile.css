@@ -170,7 +170,7 @@ body {
 .stats { display: flex; align-items: flex-end; gap: 7pt; margin-top: 3.5pt; }
 .stat-label { font-size: 7pt; font-weight: 600; color: var(--muted); }
 .stat-value { font-size: 7.4pt; }
-.stat.change { width: 46pt; }
+.stat.change { white-space: nowrap; }
 .stat.change .stat-value { font-size: 12pt; font-weight: 600; letter-spacing: -0.2pt; }
 .stat.change .stat-label { font-weight: 400; }
 .stat.change.up   { color: var(--up); }
