@@ -15,6 +15,7 @@ import math
 SPARK_SCALE = 50.0
 SPARK_WIDTH = 44.0
 SPARK_HEIGHT = 13.0
+SPARK_STROKE = 1.8
 
 CHART_WIDTH = 195.0
 CHART_HEIGHT = 112.0
@@ -32,17 +33,22 @@ def sparkline(values: list[float | None]) -> list[tuple[float, float]]:
     A country that joined the Index partway through the window has ``None``
     for its earlier years; those are skipped entirely rather than left as
     empty space, so the known points always span the full cell.
+
+    The endpoints are inset by half the stroke width so a round line cap's
+    bulge lands inside the cell instead of being clipped by the SVG viewBox
+    -- the visible line-plus-cap still spans the full ``SPARK_WIDTH``.
     """
     known = [v for v in values if v is not None]
     if not known:
         return []
     center = (max(known) + min(known)) / 2
     mid = SPARK_HEIGHT / 2
+    inset = SPARK_STROKE / 2
     if len(known) == 1:
-        return [(SPARK_WIDTH, mid - (known[0] - center) * SPARK_SCALE)]
-    step = SPARK_WIDTH / (len(known) - 1)
+        return [(SPARK_WIDTH - inset, mid - (known[0] - center) * SPARK_SCALE)]
+    step = (SPARK_WIDTH - 2 * inset) / (len(known) - 1)
     return [
-        (i * step, mid - (v - center) * SPARK_SCALE)
+        (inset + i * step, mid - (v - center) * SPARK_SCALE)
         for i, v in enumerate(known)
     ]
 

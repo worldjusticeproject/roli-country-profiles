@@ -41,6 +41,7 @@ _env.globals.update(
     path=charts.path,
     spark_w=charts.SPARK_WIDTH,
     spark_h=charts.SPARK_HEIGHT,
+    spark_stroke=charts.SPARK_STROKE,
 )
 
 
