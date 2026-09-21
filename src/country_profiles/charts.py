@@ -20,7 +20,7 @@ SPARK_STROKE = 1.8
 CHART_WIDTH = 195.0
 CHART_HEIGHT = 112.0
 CHART_YEAR_BAND = 12.0  # room under the axis for the year labels
-CHART_GUTTER = 11.5  # room for the y-axis labels
+CHART_GUTTER = 15.5  # room for the y-axis labels, which carry two decimals
 CHART_INSET_LEFT = 15.5  # first point, in from the y-axis gutter
 CHART_INSET_RIGHT = 13.0  # last point, in from the right edge (room for its label)
 CHART_TOP = 11.0
@@ -101,7 +101,7 @@ def timechart(series: list[dict], height: float = CHART_HEIGHT) -> dict:
         "plot_left": CHART_GUTTER,
         "plot_right": CHART_WIDTH,
         "label_drop": CHART_LABEL_DROP,
-        "ticks": [{"value": t, "label": f"{t:.1f}", "y": y(t)} for t in ticks],
+        "ticks": [{"value": t, "label": f"{t:.2f}", "y": y(t)} for t in ticks],
         "axis_y": y(low),
         "years": [
             {"label": row["year"], "x": left + i * step}

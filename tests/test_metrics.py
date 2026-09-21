@@ -89,7 +89,7 @@ def test_factor_text_colour_override(peru):
 
 def test_chart_axis(peru):
     chart = timechart(peru["timeseries"])
-    assert [t["label"] for t in chart["ticks"]] == ["0.4", "0.5", "0.6"]
+    assert [t["label"] for t in chart["ticks"]] == ["0.40", "0.50", "0.60"]
     assert [y["label"] for y in chart["years"]] == peru["window"]
 
 
