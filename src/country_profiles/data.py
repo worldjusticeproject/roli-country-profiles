@@ -1,8 +1,8 @@
 """Load the WJP Rule of Law Index workbook and derive everything a profile needs.
 
 All numbers follow the rules reverse-engineered from the reference profile
-(``specs/Country Profile-3.pdf``): scores display at two decimals, and percent
-changes are computed from scores rounded to *three* decimals first.
+(``specs/Country Profile-3.pdf``): scores display at two decimals, while percent
+changes are computed from the unrounded scores and rounded only for display.
 """
 
 from __future__ import annotations
@@ -155,13 +155,14 @@ def fmt(value: float | None) -> str:
 
 
 def pct_change(before: float, after: float) -> float:
-    """Percent change between two scores, rounded to three decimals first.
+    """Percent change between two scores, computed from the unrounded values.
 
-    This is what reproduces the reference profile's figures exactly; using the
-    raw values gives numbers that are off by up to a tenth of a point.
+    Rounding the scores first -- as an earlier reading of the reference profile
+    did -- shifts the result by up to a tenth of a point, because at these
+    magnitudes a 0.0005 nudge to a score is a ~0.1% nudge to the change. Only
+    the printed figure is rounded, in ``_change``.
     """
-    base = round(before, 3)
-    return (round(after, 3) - base) / base * 100
+    return (after - before) / before * 100
 
 
 def _sort_year(year: str) -> int:
