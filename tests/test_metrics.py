@@ -1,8 +1,8 @@
-"""The reference render specs/Country Profile-3.pdf is the ground truth.
+"""Reference figures, pinned to the 2026 edition of the workbook.
 
-It is drawn for a 2026 mockup, but its figures are computed from the 2025 data
-with the year labels shifted forward one year, so every number below was read
-off that PDF and must reproduce exactly from the workbook.
+The layout rules come from specs/Country Profile-3.pdf; its printed numbers
+were computed from the 2025 data, so the values below are the 2026 workbook's
+own and are refreshed whenever data/wjp_rol_index_historical.xlsx is updated.
 """
 
 import pytest
@@ -18,8 +18,8 @@ def peru():
 
 def test_edition_and_window():
     data = dataset()
-    assert data.latest == "2025"
-    assert data.window == ["2020", "2021", "2022", "2023", "2024", "2025"]
+    assert data.latest == "2026"
+    assert data.window == ["2021", "2022", "2023", "2024", "2025", "2026"]
     assert len(data.countries) == 143
 
 
@@ -36,39 +36,41 @@ def test_income_group_comes_from_the_one_sheet():
 def test_overall(peru):
     assert peru["region"] == "Latin America and Caribbean"
     assert peru["income"] == "Upper-middle"
-    assert peru["overall"]["display"] == "0.48"
+    assert peru["overall"]["display"] == "0.47"
     assert peru["overall"]["global_mean"] == "0.55"
     assert peru["overall"]["comparison"] == "Below"
-    assert peru["overall"]["change"]["text"] == "-4.4%"
+    assert peru["overall"]["change"]["text"] == "-3.1%"
     assert peru["overall"]["global_rank"] == (93, 143)
     assert peru["overall"]["regional_rank"] == (21, 32)
-    assert peru["overall"]["income_rank"] == (29, 41)
-    assert peru["baseline_label"] == "2020 vs. 2025"
+    assert peru["overall"]["income_rank"] == (32, 44)
+    assert peru["baseline_label"] == "2021 vs. 2026"
 
 
 def test_factor_scores(peru):
     scores = [f["display"] for f in peru["factors"]]
-    assert scores == ["0.57", "0.33", "0.52", "0.58",
-                      "0.61", "0.47", "0.41", "0.32"]
+    assert scores == ["0.56", "0.32", "0.53", "0.58",
+                      "0.62", "0.47", "0.41", "0.31"]
 
 
 def test_factor_changes(peru):
     changes = [f["change"]["text"] for f in peru["factors"]]
-    assert changes == ["-4.0%", "-1.5%", "-4.6%", "-6.8%",
-                       "-1.8%", "-4.5%", "-9.4%", "-2.7%"]
-    assert all(f["change"]["direction"] == "down" for f in peru["factors"])
+    assert changes == ["-5.9%", "0.1%", "-2.5%", "-6.1%",
+                       "1.9%", "-3.4%", "-5.2%", "-1.9%"]
+    directions = [f["change"]["direction"] for f in peru["factors"]]
+    assert directions == ["down", "up", "down", "down",
+                          "up", "down", "down", "down"]
 
 
 def test_factor_global_ranks(peru):
     ranks = [f["global_rank"][0] for f in peru["factors"]]
-    assert ranks == [55, 119, 62, 61, 115, 83, 120, 115]
+    assert ranks == [59, 119, 62, 64, 112, 83, 121, 118]
     assert all(f["global_rank"][1] == 143 for f in peru["factors"])
 
 
-def test_percent_change_uses_three_decimals():
-    # Rounding to three decimals first is what reproduces the reference; the
-    # raw values give -4.51%, which does not match the printed -4.4%.
-    assert round(pct_change(0.499052, 0.476563), 1) == -4.4
+def test_percent_change_uses_unrounded_scores():
+    # The scores go into the division at full precision and only the printed
+    # figure is rounded; rounding them to three decimals first would give -4.4%.
+    assert round(pct_change(0.499052, 0.476563), 1) == -4.5
 
 
 def test_subfactor_count(peru):
@@ -96,9 +98,9 @@ def test_chart_axis(peru):
 @pytest.mark.parametrize(
     "country, baseline",
     [
-        ("Ireland", "2021 vs. 2025"),  # joined the Index after 2020
-        ("Qatar", ""),                 # 2025 only, so no change to show
-        ("Denmark", "2020 vs. 2025"),
+        ("Qatar", "2025 vs. 2026"),  # joined the Index in 2025
+        ("Kuwait", "2023 vs. 2026"),  # joined in 2023
+        ("Denmark", "2021 vs. 2026"),  # the full six-year window
     ],
 )
 def test_baseline_falls_back(country, baseline):
@@ -108,9 +110,9 @@ def test_baseline_falls_back(country, baseline):
 @pytest.mark.parametrize(
     "country, spark_start",
     [
-        ("Peru", "2020"),
-        ("Denmark", "2020"),
-        ("Ireland", "2021"),
+        ("Peru", "2021"),
+        ("Denmark", "2021"),
+        ("Gabon", "2022"),
         ("Kuwait", "2023"),
         ("Qatar", "2025"),
     ],

@@ -44,7 +44,7 @@ def test_single_pdf(client):
     response = client.get("/profile/Peru.pdf")
     assert response.status_code == 200
     assert response.mimetype == "application/pdf"
-    assert "Peru_2025_country_profile.pdf" in response.headers["Content-Disposition"]
+    assert "Peru_2026_country_profile.pdf" in response.headers["Content-Disposition"]
 
 
 def test_combined_pdf_starts_a_build_when_missing(client, monkeypatch, tmp_path):
