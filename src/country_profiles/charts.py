@@ -25,6 +25,7 @@ CHART_INSET_LEFT = 15.5  # first point, in from the y-axis gutter
 CHART_INSET_RIGHT = 13.0  # last point, in from the right edge (room for its label)
 CHART_TOP = 11.0
 CHART_LABEL_DROP = 13.0  # value label baseline, below its point
+CHART_LABEL_CLEAR = 1.5  # gap kept between that label and the axis line
 
 
 def sparkline(values: list[float | None]) -> list[tuple[float, float]]:
@@ -62,6 +63,20 @@ def _ticks(low: float, high: float) -> list[float]:
     return [round(bottom + i * 0.1, 10) for i in range(round((top - bottom) * 10) + 1)]
 
 
+def _fit_labels(ticks: list[float], lowest: float, plot_height: float) -> list[float]:
+    """Extend the axis downwards until the lowest value label clears the axis.
+
+    Each country point carries its score ``CHART_LABEL_DROP`` below it. A
+    country whose line runs along the bottom of its own range -- Angola,
+    Myanmar, Sudan -- would print those labels on top of the year labels, so
+    the scale gains another 0.1 at the bottom until the deepest one fits.
+    """
+    room = CHART_LABEL_DROP + CHART_LABEL_CLEAR
+    while (lowest - ticks[0]) / (ticks[-1] - ticks[0]) * plot_height < room:
+        ticks.insert(0, round(ticks[0] - 0.1, 10))
+    return ticks
+
+
 def timechart(series: list[dict], height: float = CHART_HEIGHT) -> dict:
     """Layout for the Score Over Time chart.
 
@@ -78,6 +93,9 @@ def timechart(series: list[dict], height: float = CHART_HEIGHT) -> dict:
         if v is not None
     ]
     ticks = _ticks(min(values), max(values))
+    country = [row["country"] for row in series if row["country"] is not None]
+    if country:
+        ticks = _fit_labels(ticks, min(country), bottom - CHART_TOP)
     low, high = ticks[0], ticks[-1]
 
     def y(value: float) -> float:
