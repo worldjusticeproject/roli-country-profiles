@@ -26,6 +26,12 @@
   src: url("fonts/InterTight-ExtraBold.ttf") format("truetype");
   font-weight: 800;
 }
+@font-face {
+  font-family: "Inter Tight";
+  src: url("fonts/InterTight-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+}
 
 /* Palette from specs/country profile-specs.pdf -- Foundations > Colors. */
 :root {
@@ -201,6 +207,13 @@ body {
 .timechart { display: block; }
 .timechart .ax { font-size: 7pt; fill: var(--muted); }
 .timechart .pt { font-size: 7pt; font-weight: 600; fill: var(--chart-value); }
+.chart-note {
+  margin: 2pt 0 0;
+  text-align: right;
+  font-size: 6px;
+  font-style: italic;
+  color: var(--muted);
+}
 
 /* --------------------------------------------------------- factor detail */
 
